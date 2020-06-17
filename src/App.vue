@@ -35,12 +35,30 @@
         </b-form-group>
         <b-button @click="submit" variant="primary">Submit</b-button>
       </b-form>
+      <hr>
+      <section>
+        <h2>Registered users</h2>
+        <b-list-group class="list">
+          <b-list-group-item :key="i" v-for="(u, i) in users">
+            {{`${u.name} - ${u.email}`}}
+          </b-list-group-item>
+        </b-list-group>
+      </section>
     </b-container>
   </div>
 </template>
 
 <script>
 export default {
+  data() {
+    return {
+      user: {
+        name: '',
+        email: '',
+      },
+      users: [],
+    };
+  },
   computed: {
     nameState() {
       return this.user.name.length >= 4;
@@ -66,22 +84,34 @@ export default {
     },
   },
   methods: {
-    submit() {
-      console.log(this.user);
+    async submit() {
+      try {
+        await this.$http.post(null, this.user);
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    async fetch() {
+      try {
+        await this.$http()
+          .then((res) => {
+            this.users = Object.values(res.data);
+          });
+      } catch (err) {
+        console.error(err);
+      }
     },
   },
-  data() {
-    return {
-      user: {
-        name: '',
-        email: '',
-      },
-    };
+  mounted() {
+    this.fetch();
+  },
+  updated() {
+    this.fetch();
   },
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '~bootstrap';
 @import '~bootstrap-vue';
 
@@ -92,5 +122,9 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+.list {
+  margin-top: 1rem;
 }
 </style>
